@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"mentax.it/TDD/board"
+	"github.com/DeyV/go_game/board"
 )
 
 func main() {
