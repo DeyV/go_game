@@ -73,18 +73,34 @@ func TestGetFieldBreatch_StoneInCorner_1breath(t *testing.T) {
 	assert.Equal(t, 1, res)
 }
 
-func TestGetFieldBreatch_SecondStoneClose_1breathLess(t *testing.T) {
+func TestGetFieldBreatch_SecondStoneClose_1BreathLess(t *testing.T) {
 	b := NewBoard()
 
 	//   . .
 	// . B B .
 	//   . .
 	b.Put(1, 1, BLACK)
-	b.Put(1, 2, WHITE)
+	b.Put(2, 1, BLACK)
 
-	res := b.GetFieldBreatch(1, 1)
+	res := b.GetFieldBreatch(2, 1)
 
 	assert.Equal(t, 3, res)
+	assert.Equal(t, 3, b.Get(2, 1).breath)
+}
+
+func TestGetFieldBreatch_TopRowSecondStoneClose_1BreathLess(t *testing.T) {
+	b := NewBoard()
+
+	//   x x
+	// . B B .
+	//   . .
+	b.Put(1, 0, BLACK)
+	b.Put(2, 0, BLACK)
+
+	res := b.GetFieldBreatch(2, 0)
+
+	assert.Equal(t, 2, res)
+	assert.Equal(t, 2, b.Get(2, 0).breath)
 }
 
 func TestStoneField_ToString_String(t *testing.T) {
@@ -146,21 +162,26 @@ func TestPut_TwoStoneInGroupOnEmptyField_GroupBreath(t *testing.T) {
 func TestPut_TwoStoneInGroupOnTop_GroupBreath(t *testing.T) {
 	b := NewBoard()
 
-	//   x x
+	//   . .
 	// . B B .
 	//   . .
-	b.Put(2, 0, BLACK)
-	fmt.Println(b)
-	b.Put(3, 0, BLACK)
+	b.Put(2, 1, BLACK)
+	// fmt.Println(b)
 
-	res := b.Get(3, 0).Group.breath
-
-	fmt.Println(b)
+	res := b.Get(2, 1).Group.breath
 
 	assert.Equal(t, 4, res)
+
+	b.Put(3, 1, BLACK)
+
+	f2 := b.Get(3, 1)
+
+	// fmt.Println(b)
+
+	assert.Equal(t, 3, f2.breath)
+	assert.Equal(t, 6, f2.Group.breath)
 }
 
-/*
 func TestPut_TwoStoneInCornerWith_GroupBreath(t *testing.T) {
 	b := NewBoard()
 
@@ -206,7 +227,18 @@ func TestPut_ThreeStoneInCornerWithNeightbour_GroupBreath(t *testing.T) {
 	assert.Equal(t, 3, res)
 }
 
-/*
+func TestRemoveGroup_OneFieldGroup_EmptyField(t *testing.T) {
+	b := NewBoard()
+
+	b.Put(0, 0, BLACK)
+	group := b.Get(0, 0).Group
+	i := b.RemoveGroup(group)
+
+	res := b.Get(0, 0).IsEmpty()
+	assert.True(t, res)
+	assert.Equal(t, 1, i) // one stone
+}
+
 func TestPut_PutStoneAroundOtherInCorner_OtherDisaper(t *testing.T) {
 	b := NewBoard()
 
@@ -224,4 +256,5 @@ func TestPut_PutStoneAroundOtherInCorner_OtherDisaper(t *testing.T) {
 	}
 }
 
-*/
+/*
+ */

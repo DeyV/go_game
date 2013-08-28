@@ -26,6 +26,11 @@ func (b *playBoard) Put(x, y int, color StoneColor) bool {
 	field := NewStoneField(color, fieldBreath, fieldGroup)
 
 	fieldGroup.breath += fieldBreath
+
+	if fieldGroup.breath <= 0 {
+		panic(fmt.Sprintf("You cant put stone on field ( %d, %d ) ", x, y))
+	}
+
 	fieldGroup.size++
 
 	b.fields[y][x] = field
@@ -63,8 +68,8 @@ var neighbors = [...][2]int{
 
 func (b *playBoard) visitNeighbors(x, y int, do func(*StoneField) bool) bool {
 	for _, row := range neighbors {
-		if b.onBoard(row[0]+y, row[1]+x) {
-			field := b.Get(row[0]+y, row[1]+x)
+		if b.onBoard(row[0]+x, row[1]+y) {
+			field := b.Get(row[0]+x, row[1]+y)
 
 			toBeCon := do(field)
 
@@ -119,10 +124,43 @@ func (b *playBoard) GetNearGroup(x, y int, color StoneColor) *StoneGroup {
 	return group
 }
 
+func (b *playBoard) RemoveGroup(gr *StoneGroup) int {
+	i := 0
+	for y, row := range b.fields {
+		for x, field := range row {
+			if field.Group == gr {
+				b.clearField(x, y)
+				i++
+			}
+		}
+	}
+	return i
+}
+
+func (b *playBoard) clearField(x, y int) bool {
+	field := b.Get(x, y)
+	field.StoneColor = EMPTY
+
+	group := field.Group
+
+	b.visitNeighbors(x, y, func(f *StoneField) bool {
+		if f.IsEmpty() {
+			return true
+		}
+
+		if f.Group == group {
+			return true // its group removed at this moment
+		}
+
+		f.ChangeBreath(1)
+		return true
+	})
+	return true
+}
+
 func (b *playBoard) RemoveNeighborBreath(x, y int) bool {
 	groupLive := true
 	b.visitNeighbors(x, y, func(f *StoneField) bool {
-		fmt.Println("group RemoveNeighborBreath", f, x, y)
 		if f.IsEmpty() {
 			return true
 		}
@@ -130,7 +168,7 @@ func (b *playBoard) RemoveNeighborBreath(x, y int) bool {
 		groupLive = f.ChangeBreath(-1)
 
 		if !groupLive {
-			fmt.Println("group deadth")
+			b.RemoveGroup(f.Group)
 		}
 
 		return true
