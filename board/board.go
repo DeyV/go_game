@@ -2,6 +2,7 @@ package board
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 )
 
@@ -15,20 +16,27 @@ func NewBoard() *playBoard {
 }
 
 func (b *playBoard) Put(x, y int, color StoneColor) bool {
-	if !b.fields[y][x].IsEmpty() {
-		return false
+	if !b.Get(x, y).IsEmpty() {
+		// return false
+		panic(fmt.Sprintf("this field ( %d, %d ) is not empty", x, y))
 	}
 
 	fieldBreath := b.GetFieldBreatch(x, y)
-	fieldGroup := b.GetFieldGroup(x, y)
+	fieldGroup := b.GetNearGroup(x, y, color)
 	field := NewStoneField(color, fieldBreath, fieldGroup)
 
+	fieldGroup.breath += fieldBreath
+	fieldGroup.size++
+
 	b.fields[y][x] = field
+
+	b.RemoveNeighborBreath(x, y)
+
 	return true
 }
 
-func (b *playBoard) Get(x, y int) StoneField {
-	return b.fields[y][x]
+func (b *playBoard) Get(x, y int) *StoneField {
+	return &b.fields[y][x]
 }
 
 func (b *playBoard) String() string {
@@ -53,8 +61,7 @@ var neighbors = [...][2]int{
 	{1, 0},
 }
 
-func (b *playBoard) visitNeighbors(x, y int, do func(StoneField) bool) bool {
-
+func (b *playBoard) visitNeighbors(x, y int, do func(*StoneField) bool) bool {
 	for _, row := range neighbors {
 		if b.onBoard(row[0]+y, row[1]+x) {
 			field := b.Get(row[0]+y, row[1]+x)
@@ -84,7 +91,7 @@ func (b *playBoard) onBoard(x, y int) bool {
 func (b *playBoard) GetFieldBreatch(x, y int) int8 {
 	var result int8 = 0
 
-	b.visitNeighbors(x, y, func(f StoneField) bool {
+	b.visitNeighbors(x, y, func(f *StoneField) bool {
 		if f.IsEmpty() {
 			result++
 		}
@@ -94,13 +101,13 @@ func (b *playBoard) GetFieldBreatch(x, y int) int8 {
 	return result
 }
 
-func (b *playBoard) GetFieldGroup(x, y int) *StoneGroup {
+func (b *playBoard) GetNearGroup(x, y int, color StoneColor) *StoneGroup {
 	var group *StoneGroup
-	myColor := b.Get(x, y).StoneColor
 
-	b.visitNeighbors(x, y, func(f StoneField) bool {
-		if !f.IsEmpty() && f.StoneColor == myColor {
+	b.visitNeighbors(x, y, func(f *StoneField) bool {
+		if !f.IsEmpty() && f.StoneColor == color {
 			group = f.Group
+			return false
 		}
 		return true
 	})
@@ -110,4 +117,22 @@ func (b *playBoard) GetFieldGroup(x, y int) *StoneGroup {
 	}
 
 	return group
+}
+
+func (b *playBoard) RemoveNeighborBreath(x, y int) bool {
+	groupLive := true
+	b.visitNeighbors(x, y, func(f *StoneField) bool {
+		if f.IsEmpty() {
+			return true
+		}
+
+		groupLive = f.ChangeBreath(-1)
+
+		if !groupLive {
+			fmt.Println("group deadth")
+		}
+
+		return true
+	})
+	return true
 }
