@@ -2,6 +2,7 @@ package board
 
 import (
 	"fmt"
+	"strconv"
 )
 
 type StoneGroup struct {
@@ -31,6 +32,10 @@ func (s *StoneField) ChangeBreath(val int8) bool {
 	}
 
 	return true
+}
+
+func (s *StoneField) String() string {
+	return s.StoneColor.String() + strconv.Itoa(int(s.breath))
 }
 
 type StoneColor int

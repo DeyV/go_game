@@ -73,6 +73,20 @@ func TestGetFieldBreatch_StoneInCorner_1breath(t *testing.T) {
 	assert.Equal(t, 1, res)
 }
 
+func TestGetFieldBreatch_SecondStoneClose_1breathLess(t *testing.T) {
+	b := NewBoard()
+
+	//   . .
+	// . B B .
+	//   . .
+	b.Put(1, 1, BLACK)
+	b.Put(1, 2, WHITE)
+
+	res := b.GetFieldBreatch(1, 1)
+
+	assert.Equal(t, 3, res)
+}
+
 func TestStoneField_ToString_String(t *testing.T) {
 	textInfo := BLACK.String()
 
@@ -122,7 +136,7 @@ func TestPut_TwoStoneInGroupOnEmptyField_GroupBreath(t *testing.T) {
 	// . B B .
 	//   . .
 	b.Put(2, 2, BLACK)
-	b.Put(2, 3, BLACK)
+	b.Put(3, 2, BLACK)
 
 	res := b.Get(2, 2).Group.breath
 
@@ -135,10 +149,13 @@ func TestPut_TwoStoneInGroupOnTop_GroupBreath(t *testing.T) {
 	//   x x
 	// . B B .
 	//   . .
-	b.Put(0, 2, BLACK)
-	b.Put(0, 3, BLACK)
+	b.Put(2, 0, BLACK)
+	fmt.Println(b)
+	b.Put(3, 0, BLACK)
 
-	res := b.Get(0, 3).Group.breath
+	res := b.Get(3, 0).Group.breath
+
+	fmt.Println(b)
 
 	assert.Equal(t, 4, res)
 }

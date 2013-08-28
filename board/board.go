@@ -122,6 +122,7 @@ func (b *playBoard) GetNearGroup(x, y int, color StoneColor) *StoneGroup {
 func (b *playBoard) RemoveNeighborBreath(x, y int) bool {
 	groupLive := true
 	b.visitNeighbors(x, y, func(f *StoneField) bool {
+		fmt.Println("group RemoveNeighborBreath", f, x, y)
 		if f.IsEmpty() {
 			return true
 		}
