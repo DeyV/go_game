@@ -43,33 +43,32 @@ func TestPut_StoneOnUsedField_Panic(t *testing.T) {
 	assert.Panics(t, func() {
 		_ = b.Put(1, 1, WHITE)
 	})
-
 }
 
 func TestGetBreathCount_StoneOnEmptyField_Full(t *testing.T) {
 	b := NewBoard()
+
 	b.Put(1, 1, BLACK)
 
 	res := b.GetFieldBreatch(1, 1)
-
 	assert.Equal(t, 4, res)
 }
 
 func TestGetFieldBreatch_StoneOnTopField_3breath(t *testing.T) {
 	b := NewBoard()
+
 	b.Put(1, 0, BLACK)
 
 	res := b.GetFieldBreatch(1, 0)
-
 	assert.Equal(t, 3, res)
 }
 
 func TestGetFieldBreatch_StoneInCorner_1breath(t *testing.T) {
 	b := NewBoard()
+
 	b.Put(1, 0, BLACK)
 
 	res := b.GetFieldBreatch(0, 0)
-
 	assert.Equal(t, 1, res)
 }
 
@@ -83,7 +82,6 @@ func TestGetFieldBreatch_SecondStoneClose_1BreathLess(t *testing.T) {
 	b.Put(2, 1, BLACK)
 
 	res := b.GetFieldBreatch(2, 1)
-
 	assert.Equal(t, 3, res)
 	assert.Equal(t, 3, b.Get(2, 1).breath)
 }
@@ -98,7 +96,6 @@ func TestGetFieldBreatch_TopRowSecondStoneClose_1BreathLess(t *testing.T) {
 	b.Put(2, 0, BLACK)
 
 	res := b.GetFieldBreatch(2, 0)
-
 	assert.Equal(t, 2, res)
 	assert.Equal(t, 2, b.Get(2, 0).breath)
 }
@@ -113,7 +110,6 @@ func TestPlayBoard_ToString_String(t *testing.T) {
 	b := NewBoard()
 
 	textInfo := b.String()
-
 	assert.NotEmpty(t, textInfo)
 }
 
@@ -126,7 +122,6 @@ func TestPut_OneStoneInGroupOnEmptyField_GroupBreath(t *testing.T) {
 	b.Put(2, 2, BLACK)
 
 	res := b.Get(2, 2).Group.breath
-
 	assert.Equal(t, 4, res)
 }
 
@@ -141,7 +136,6 @@ func TestPut_TwoStoneNextTo_OneGroup(t *testing.T) {
 
 	g1 := b.Get(2, 2).Group
 	g2 := b.Get(3, 2).Group
-
 	assert.Equal(t, g1, g2)
 }
 
@@ -155,7 +149,6 @@ func TestPut_TwoStoneInGroupOnEmptyField_GroupBreath(t *testing.T) {
 	b.Put(3, 2, BLACK)
 
 	res := b.Get(2, 2).Group.breath
-
 	assert.Equal(t, 6, res)
 }
 
@@ -175,9 +168,6 @@ func TestPut_TwoStoneInGroupOnTop_GroupBreath(t *testing.T) {
 	b.Put(3, 1, BLACK)
 
 	f2 := b.Get(3, 1)
-
-	// fmt.Println(b)
-
 	assert.Equal(t, 3, f2.breath)
 	assert.Equal(t, 6, f2.Group.breath)
 }
@@ -192,7 +182,6 @@ func TestPut_TwoStoneInCornerWith_GroupBreath(t *testing.T) {
 	b.Put(1, 0, BLACK)
 
 	res := b.Get(1, 0).Group.breath
-
 	assert.Equal(t, 3, res)
 }
 
@@ -207,7 +196,6 @@ func TestPut_TwoStoneInCornerWithNeightbour_GroupBreath(t *testing.T) {
 	b.Put(2, 0, WHITE)
 
 	res := b.Get(1, 0).Group.breath
-
 	assert.Equal(t, 2, res)
 }
 
@@ -223,7 +211,6 @@ func TestPut_ThreeStoneInCornerWithNeightbour_GroupBreath(t *testing.T) {
 	b.Put(3, 0, WHITE)
 
 	res := b.Get(1, 0).Group.breath
-
 	assert.Equal(t, 3, res)
 }
 
@@ -249,11 +236,7 @@ func TestPut_PutStoneAroundOtherInCorner_OtherDisaper(t *testing.T) {
 	b.Put(0, 1, BLACK)
 
 	res := b.Get(0, 0)
-	// fmt.Print(b.String())
-
-	if !res.IsEmpty() {
-		t.Error()
-	}
+	assert.True(t, res.IsEmpty())
 }
 
 /*

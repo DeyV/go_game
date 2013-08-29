@@ -61,11 +61,11 @@ func (g *OpenGame) PressBackspace() {
 func (g *OpenGame) CheckKey(r rune, s int) bool {
 	size := rune(s)
 
-	if r >= 'a' && r < 'a'+size {
+	if r >= 'A' && r < 'A'+size {
 		return true
 	}
 
-	if r >= 'A' && r < 'A'+size {
+	if r >= 'a' && r < 'a'+size {
 		return true
 	}
 
@@ -74,6 +74,32 @@ func (g *OpenGame) CheckKey(r rune, s int) bool {
 	}
 
 	return false
+}
+
+func (g *OpenGame) convertValue(val string) (x, y int) {
+	var xx rune
+	var yy string
+
+	for _, r := range val {
+		if r >= 'a' {
+			xx = r - ('a' - 'A')
+			continue
+		}
+
+		if r >= 'A' {
+			xx = r
+			continue
+		}
+
+		// on big board it can will be bigger number then 9
+		if r >= '1' {
+			yy += string(r)
+		}
+	}
+
+	x = int(xx - 'A' + 1)
+	y, _ = strconv.Atoi(yy)
+	return
 }
 
 /*******************************************/
