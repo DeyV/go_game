@@ -6,16 +6,20 @@ import (
 	"strconv"
 )
 
-type playBoard struct {
+type PlayBoard struct {
 	fields [9][9]StoneField
 	size   int
 }
 
-func NewBoard() *playBoard {
-	return &playBoard{size: 9}
+func NewBoard() *PlayBoard {
+	return &PlayBoard{size: 9}
 }
 
-func (b *playBoard) Put(x, y int, color StoneColor) bool {
+func (b *PlayBoard) Size() int {
+	return b.size
+}
+
+func (b *PlayBoard) Put(x, y int, color StoneColor) bool {
 	if !b.Get(x, y).IsEmpty() {
 		// return false
 		panic(fmt.Sprintf("this field ( %d, %d ) is not empty", x, y))
@@ -26,6 +30,11 @@ func (b *playBoard) Put(x, y int, color StoneColor) bool {
 	field := NewStoneField(color, fieldBreath, fieldGroup)
 
 	fieldGroup.breath += fieldBreath
+
+	if fieldGroup.breath <= 0 {
+		panic(fmt.Sprintf("You cant put stone on field ( %d, %d ) ", x, y))
+	}
+
 	fieldGroup.size++
 
 	b.fields[y][x] = field
@@ -35,11 +44,11 @@ func (b *playBoard) Put(x, y int, color StoneColor) bool {
 	return true
 }
 
-func (b *playBoard) Get(x, y int) *StoneField {
+func (b *PlayBoard) Get(x, y int) *StoneField {
 	return &b.fields[y][x]
 }
 
-func (b *playBoard) String() string {
+func (b *PlayBoard) String() string {
 	var buff bytes.Buffer
 
 	for i, row := range b.fields {
@@ -61,10 +70,10 @@ var neighbors = [...][2]int{
 	{1, 0},
 }
 
-func (b *playBoard) visitNeighbors(x, y int, do func(*StoneField) bool) bool {
+func (b *PlayBoard) visitNeighbors(x, y int, do func(*StoneField) bool) bool {
 	for _, row := range neighbors {
-		if b.onBoard(row[0]+y, row[1]+x) {
-			field := b.Get(row[0]+y, row[1]+x)
+		if b.onBoard(row[0]+x, row[1]+y) {
+			field := b.Get(row[0]+x, row[1]+y)
 
 			toBeCon := do(field)
 
@@ -77,7 +86,7 @@ func (b *playBoard) visitNeighbors(x, y int, do func(*StoneField) bool) bool {
 	return true
 }
 
-func (b *playBoard) onBoard(x, y int) bool {
+func (b *PlayBoard) onBoard(x, y int) bool {
 	if x < 0 || x >= b.size {
 		return false
 	}
@@ -88,7 +97,7 @@ func (b *playBoard) onBoard(x, y int) bool {
 	return true
 }
 
-func (b *playBoard) GetFieldBreatch(x, y int) int8 {
+func (b *PlayBoard) GetFieldBreatch(x, y int) int8 {
 	var result int8 = 0
 
 	b.visitNeighbors(x, y, func(f *StoneField) bool {
@@ -101,7 +110,7 @@ func (b *playBoard) GetFieldBreatch(x, y int) int8 {
 	return result
 }
 
-func (b *playBoard) GetNearGroup(x, y int, color StoneColor) *StoneGroup {
+func (b *PlayBoard) GetNearGroup(x, y int, color StoneColor) *StoneGroup {
 	var group *StoneGroup
 
 	b.visitNeighbors(x, y, func(f *StoneField) bool {
@@ -119,10 +128,43 @@ func (b *playBoard) GetNearGroup(x, y int, color StoneColor) *StoneGroup {
 	return group
 }
 
-func (b *playBoard) RemoveNeighborBreath(x, y int) bool {
+func (b *PlayBoard) RemoveGroup(gr *StoneGroup) int {
+	i := 0
+	for y, row := range b.fields {
+		for x, field := range row {
+			if field.Group == gr {
+				b.clearField(x, y)
+				i++
+			}
+		}
+	}
+	return i
+}
+
+func (b *PlayBoard) clearField(x, y int) bool {
+	field := b.Get(x, y)
+	field.StoneColor = EMPTY
+
+	group := field.Group
+
+	b.visitNeighbors(x, y, func(f *StoneField) bool {
+		if f.IsEmpty() {
+			return true
+		}
+
+		if f.Group == group {
+			return true // its group removed at this moment
+		}
+
+		f.ChangeBreath(1)
+		return true
+	})
+	return true
+}
+
+func (b *PlayBoard) RemoveNeighborBreath(x, y int) bool {
 	groupLive := true
 	b.visitNeighbors(x, y, func(f *StoneField) bool {
-		fmt.Println("group RemoveNeighborBreath", f, x, y)
 		if f.IsEmpty() {
 			return true
 		}
@@ -130,7 +172,7 @@ func (b *playBoard) RemoveNeighborBreath(x, y int) bool {
 		groupLive = f.ChangeBreath(-1)
 
 		if !groupLive {
-			fmt.Println("group deadth")
+			b.RemoveGroup(f.Group)
 		}
 
 		return true
