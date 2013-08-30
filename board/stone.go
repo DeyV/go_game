@@ -1,7 +1,7 @@
 package board
 
 import (
-	"fmt"
+	// "fmt"
 	"strconv"
 )
 
@@ -25,7 +25,7 @@ func (s *StoneField) ChangeBreath(val int8) bool {
 
 	s.Group.breath += val
 
-	fmt.Println(val, s.breath, s.Group.breath)
+	// fmt.Println(val, s.breath, s.Group.breath)
 
 	if s.Group.breath <= 0 {
 		return false
