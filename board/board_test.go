@@ -41,7 +41,7 @@ func TestPut_StoneOnUsedField_Panic(t *testing.T) {
 	b.Put(1, 1, BLACK)
 
 	assert.Panics(t, func() {
-		_ = b.Put(1, 1, WHITE)
+		b.Put(1, 1, WHITE)
 	})
 }
 
